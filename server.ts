@@ -1,20 +1,31 @@
+import mongoose from "mongoose";
 import express from "express";
 import * as dotenv from "dotenv";
-import mongoose from "mongoose";
-import { MongoClient, ServerApiVersion, MongoClientOptions } from "mongodb";
+import userRoutes from "./routes/user.routes";
 dotenv.config();
-// TODO: Replace the following with your app's Firebase project configuration
 const app = express();
-// Initialize Firebase
 
 const port = process.env.PORT || 3000;
-const client = new MongoClient(`${process.env.URI}`);
 
 app.use(express.json());
 
+app.use((req, res, next) => {
+  res.setHeader("Access-Control-Allow-Origin", "*");
+  res.setHeader(
+    "Access-Control-Allow-Methods",
+    "GET, POST, PUT, PATCH, DELETE"
+  );
+  res.setHeader("Access-Control-Allow-Headers", "Content-Type, Authorization");
+  next();
+});
+
+app.use("/users", userRoutes);
+
 app.listen(port, async () => {
-  client.connect((err) => {
-    console.log("Connection successful");
-    client.close();
-  });
+  mongoose
+    .connect(`${process.env.DATABASE_URI}`)
+    .then((result) => {
+      console.log("Connected to Database");
+    })
+    .catch((err) => console.log(err));
 });
