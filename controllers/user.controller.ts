@@ -1,14 +1,15 @@
 import CryptoJS from "crypto-js";
 import { Request, Response } from "express";
-import { AES, HmacSHA1, HmacSHA256, SHA256 } from "crypto-js";
+import { AES } from "crypto-js";
 import jwt from "jsonwebtoken";
-import mongoose from "mongoose";
 import UserModel from "../model/user.model";
 
 const signup = async (req: Request, res: Response) => {
   if (!req.body.email.trim() || !req.body.password.trim())
     return res.status(400).json({
       message: "Email/Password is empty",
+      statusCode: 400,
+      ok: false,
     });
 
   const email = req.body.email;
@@ -20,6 +21,8 @@ const signup = async (req: Request, res: Response) => {
     if (isEmailExists) {
       return res.status(400).json({
         message: "This email is already used",
+        statusCode: 400,
+        ok: false,
       });
     }
 
@@ -33,14 +36,26 @@ const signup = async (req: Request, res: Response) => {
       password: encryptedPassword,
     });
 
-    const registeredUser = (await user.save()).depopulate("password");
+    const registeredUser = await user.save();
+    const payload = {
+      _id: registeredUser._id,
+      email: registeredUser.email,
+    };
 
+    const access_token = generateAccessToken(payload);
+    const refresh_token = generateRefreshToken(payload);
     return res.status(201).json({
-      user: { email: registeredUser.email, _id: registeredUser._id },
+      email: registeredUser.email,
+      statusCode: 201,
+      _id: registeredUser._id,
+      ok: true,
+      access_token,
+      refresh_token,
     });
   } catch (error) {
     return res.status(500).json({
-      errorCode: 500,
+      statusCode: 500,
+      ok: false,
       message: "An error occured",
     });
   }
