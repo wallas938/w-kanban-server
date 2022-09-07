@@ -61,7 +61,7 @@ const signup = async (req: Request, res: Response) => {
   }
 };
 
-const login = async (req: Request, res: Response) => {
+const signin = async (req: Request, res: Response) => {
   if (!req.body.email.trim() || !req.body.password.trim())
     return res.status(400).json({
       message: "Email/Password is empty",
@@ -99,7 +99,10 @@ const login = async (req: Request, res: Response) => {
     const refresh_token = generateRefreshToken(payload);
 
     return res.status(200).json({
-      user: payload,
+      email: user.email,
+      statusCode: 201,
+      _id: user._id,
+      ok: true,
       access_token,
       refresh_token,
     });
@@ -150,5 +153,5 @@ const verifyTokenValidity = (token: string): boolean => {
 
 export default {
   signup,
-  login,
+  signin,
 };
