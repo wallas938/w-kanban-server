@@ -75,39 +75,48 @@ const signin = async (req: Request, res: Response) => {
     return res.status(401).json({
       message: "Email/Password is wrong",
     });
+  try {
+    const user = await UserModel.findOne({ email: email });
 
-  const user = await UserModel.findOne({ email: email });
+    if (user) {
+      const bytes = AES.decrypt(
+        user?.password,
+        `${process.env.PASSWORD_SECRET_KEY}`
+      );
+      const userPassword = bytes.toString(CryptoJS.enc.Utf8);
 
-  if (user) {
-    const bytes = AES.decrypt(
-      user?.password,
-      `${process.env.PASSWORD_SECRET_KEY}`
-    );
-    const userPassword = bytes.toString(CryptoJS.enc.Utf8);
+      if (userPassword !== password)
+        return res.status(401).json({
+          message: "Email/Password is wrong",
+        });
 
-    if (userPassword !== password)
-      return res.status(401).json({
-        message: "Email/Password is wrong",
+      const payload = {
+        _id: user._id,
+        email: user.email,
+      };
+
+      const access_token = generateAccessToken(payload);
+      const refresh_token = generateRefreshToken(payload);
+
+      return res.status(200).json({
+        email: user.email,
+        statusCode: 201,
+        _id: user._id,
+        ok: true,
+        access_token,
+        refresh_token,
       });
-
-    const payload = {
-      _id: user._id,
-      email: user.email,
-    };
-
-    const access_token = generateAccessToken(payload);
-    const refresh_token = generateRefreshToken(payload);
-
-    return res.status(200).json({
-      email: user.email,
-      statusCode: 201,
-      _id: user._id,
-      ok: true,
-      access_token,
-      refresh_token,
+    }
+  } catch (error) {
+    return res.status(500).json({
+      statusCode: 500,
+      ok: false,
+      message: "An error occured",
     });
   }
 };
+
+const autoLogin = async (req: Request, res: Response) => {};
 
 const checkIfEmailExists = async (email: string) => {
   try {
