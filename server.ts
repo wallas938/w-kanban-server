@@ -2,6 +2,7 @@ import mongoose from "mongoose";
 import express from "express";
 import * as dotenv from "dotenv";
 import userRoutes from "./routes/user.routes";
+import boardRoutes from "./routes/board.routes";
 dotenv.config();
 const app = express();
 
@@ -20,6 +21,7 @@ app.use((req, res, next) => {
 });
 
 app.use("/api/users", userRoutes);
+app.use("/api/boards", boardRoutes);
 
 app.listen(port, async () => {
   mongoose
