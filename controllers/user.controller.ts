@@ -131,33 +131,17 @@ const checkIfEmailExists = async (email: string) => {
 };
 
 const generateAccessToken = (payload: any): string => {
-  return jwt.sign(payload, `${process.env.ACCESS_TOKEN_SECRET_KEY}`, {
-    expiresIn: Math.floor(Date.now() / 1000) + 60 * 60,
+  var oneDayInMilliseconds = 1 * 24 * 60 * 60 * 1000;
+  return "Bearer " + jwt.sign(payload, `${process.env.ACCESS_TOKEN_SECRET_KEY}`, {
+    expiresIn: Date.now() + oneDayInMilliseconds,
   });
 };
 
 const generateRefreshToken = (payload: any): string => {
-  return jwt.sign(payload, `${process.env.ACCESS_TOKEN_SECRET_KEY}`, {
-    expiresIn: Math.floor(Date.now() / 1000) + 60 * 3600,
+  var weekInMilliseconds = 7 * 24 * 60 * 60 * 1000;
+  return "Bearer " + jwt.sign(payload, `${process.env.REFRESH_TOKEN_SECRET_KEY}`, {
+    expiresIn: Date.now() + weekInMilliseconds,
   });
-};
-
-const verifyTokenValidity = (token: string): boolean => {
-  /* Verifier la validité du token ( et   en verifiant cette sont refresh token) */
-
-  /* - forme et expiration
-    - si exp dépassé on verifie qu'il existe en tant qu'utilisateur avant de mettre son token a jour
-    - s'il existe mettre a jour avec refresh token sauf si exp aussi alors renvoyer vers la page d'authentification */
-  try {
-    const tokenVerified = jwt.verify(
-      "false token",
-      `${process.env.ACCESS_TOKEN_SECRET_KEY}`
-    );
-
-    return true;
-  } catch (error) {
-    return false;
-  }
 };
 
 export default {
