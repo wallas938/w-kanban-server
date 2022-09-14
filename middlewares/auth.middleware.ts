@@ -1,24 +1,24 @@
 import { Response, Request } from "express";
-import jwt from "jsonwebtoken";
+import { isTokenValid } from "~/utils/token.func";
 const acc_tkn = (req: any, res: Response, next: any) => {
-  const access_token = req.get("Authorization");
-  if (access_token) {
-    const token = access_token.split(" ")[1];
-    if (isTokenValid(token)) {
-      req.isTokenValid = true;
+  const accessToken = req.get("Authorization");
+  if (accessToken) {
+    const token = accessToken;
+    if (isTokenValid(token, `${process.env.ACCESS_TOKEN_SECRET_KEY}`)) {
+      req.isAccessTokenValid = true;
     } else {
-      req.isTokenValid = false;
+      req.isAccessTokenValid = false;
     }
   }
   next();
 };
 
 const rfsh_tkn = (req: any, res: Response, next: any) => {
-  if (req.isTokenValid) {
+  if (req.isAccessTokenValid) {
     next();
   } else {
-    const refresh_token = req.get("rf_t").split(" ")[1];
-    if (isTokenValid(refresh_token)) {
+    const refreshToken = req.get("rf_t");
+    if (isTokenValid(refreshToken, `${process.env.REFRESH_TOKEN_SECRET_KEY}`)) {
       next();
     } else {
       return res.status(401).json({
@@ -26,24 +26,6 @@ const rfsh_tkn = (req: any, res: Response, next: any) => {
         ok: false,
       });
     }
-  }
-};
-
-const isTokenValid = (token: string): boolean => {
-  try {
-    const decodesToken: any = jwt.decode(token);
-    const tokenVerified = jwt.verify(
-      token,
-      `${process.env.ACCESS_TOKEN_SECRET_KEY}`
-    );
-
-    if (new Date(Date.now()) > new Date(decodesToken.exp)) {
-      return false;
-    }
-
-    return true;
-  } catch (error) {
-    return false;
   }
 };
 
