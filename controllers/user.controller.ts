@@ -3,12 +3,12 @@ import { Request, Response } from "express";
 import { AES } from "crypto-js";
 import jwt from "jsonwebtoken";
 import UserModel from "../model/user.model";
+import { isTokenValid } from "~/utils/token.func";
 
 const signup = async (req: Request, res: Response) => {
   if (!req.body.email.trim() || !req.body.password.trim())
     return res.status(400).json({
       message: "Email/Password is empty",
-      statusCode: 400,
       ok: false,
     });
 
@@ -42,19 +42,19 @@ const signup = async (req: Request, res: Response) => {
       email: registeredUser.email,
     };
 
-    const access_token = generateAccessToken(payload);
-    const refresh_token = generateRefreshToken(payload);
+    const accessToken = generateAccessToken(payload);
+    const refreshToken = generateRefreshToken(payload);
     return res.status(201).json({
-      email: registeredUser.email,
-      statusCode: 201,
+      user: {
+        email: registeredUser.email,
       _id: registeredUser._id,
+      accessToken,
+      refreshToken,
+      },
       ok: true,
-      access_token,
-      refresh_token,
     });
   } catch (error) {
     return res.status(500).json({
-      statusCode: 500,
       ok: false,
       message: "An error occured",
     });
@@ -95,16 +95,17 @@ const signin = async (req: Request, res: Response) => {
         email: user.email,
       };
 
-      const access_token = generateAccessToken(payload);
-      const refresh_token = generateRefreshToken(payload);
+      const accessToken = generateAccessToken(payload);
+      const refreshToken = generateRefreshToken(payload);
 
       return res.status(200).json({
-        email: user.email,
-        statusCode: 201,
+        user: {
+          email: user.email,
         _id: user._id,
-        ok: true,
-        access_token,
-        refresh_token,
+        accessToken,
+        refreshToken,
+      },
+      ok: true,
       });
     }
   } catch (error) {
@@ -115,6 +116,31 @@ const signin = async (req: Request, res: Response) => {
     });
   }
 };
+
+const getUser = async (req: Request, res: Response) => {
+  const accessToken: any =  req.query.access_token;
+  const refreshToken =  req.query.refresh_token;
+
+  if(isTokenValid(accessToken, `${process.env.ACCESS_TOKEN_SECRET_KEY}`)) {
+    const userData: any = jwt.decode(accessToken.split(" ")[1])
+    
+    const user = await UserModel.findById(userData._id).select('-password')
+
+    if(user) {
+
+      return res.status(200).json({
+        user: {
+          email: user.email,
+          _id: user._id,
+          accessToken,
+          refreshToken,
+        },
+        ok: true,
+      })
+    }
+    
+  }
+}
 
 const autoLogin = async (req: Request, res: Response) => {};
 
@@ -147,4 +173,5 @@ const generateRefreshToken = (payload: any): string => {
 export default {
   signup,
   signin,
+  getUser
 };
