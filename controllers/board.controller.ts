@@ -45,15 +45,20 @@ const getBoards = async (req: Request, res: Response) => {
 
 const updateBoard = async (req: Request, res: Response) => {
   try {
-    await BoardModel.deleteOne({ _id: req.params.boardId });
+
+    if(req.params.boardId && req.body.board) {
+      await BoardModel.deleteOne({ _id: req.params.boardId });
     
-    const board = await new BoardModel(req.body.board).save();
+      const board = await new BoardModel(req.body.board).save();
+
+      return res.status(201).json({
+        board,
+        message: "Board updated",
+        ok: true
+      })
+    }
     
-    return res.status(201).json({
-      board,
-      message: "Board updated",
-      ok: true
-    })
+    throw new Error("Wrong baord id or baord is missing")
     
   } catch (error) {
     return res.status(500).json({
