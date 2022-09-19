@@ -5,7 +5,7 @@ import BoardModel from "~/model/board.model";
 const postBoard = async (req: Request, res: Response) => {
   try {
     const board = await new BoardModel(req.body.board).save();
-
+    
     return res.status(201).json({
       serverMessage: "A new Board was added !",
       statusCode: 201,
@@ -19,7 +19,7 @@ const postBoard = async (req: Request, res: Response) => {
       errorMessage: "An error occured",
       error: error,
     });
-  }
+  } 
 };
 
 const getBoards = async (req: Request, res: Response) => {
@@ -41,9 +41,32 @@ const getBoards = async (req: Request, res: Response) => {
       error: error
     })
   }
+};
+
+const updateBoard = async (req: Request, res: Response) => {
+  try {
+    await BoardModel.deleteOne({ _id: req.params.boardId });
+    
+    const board = await new BoardModel(req.body.board).save();
+    
+    return res.status(201).json({
+      board,
+      message: "Board updated",
+      ok: true
+    })
+    
+  } catch (error) {
+    return res.status(500).json({
+      error,
+      message: "An error occured",
+      ok: false
+    })
+  }
+  
 }
 
 export default {
   postBoard,
-  getBoards
+  getBoards,
+  updateBoard
 };
