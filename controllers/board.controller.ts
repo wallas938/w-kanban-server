@@ -22,6 +22,36 @@ const postBoard = async (req: Request, res: Response) => {
   } 
 };
 
+const deleteBoard = async (req: Request, res: Response) => {
+  try {
+
+    if(req.params.boardId) {
+      
+      const board = await BoardModel.exists({_id: req.params.boardId })
+
+      if (board) {
+        await BoardModel.deleteOne({ _id: req.params.boardId })
+        
+        return res.status(201).json({
+          message: "Board deleted successfully!",
+          ok: true
+        })
+      }
+
+      return res.status(404).json({
+        message: "Board not found!",
+        ok: false
+      });
+    }
+  } catch (error) {
+    return res.status(500).json({
+      error,
+      message: "An error occured",
+      ok: false
+    })
+  }
+};
+
 const getBoards = async (req: Request, res: Response) => {
   const userId = req.query.userId;
   try {
@@ -73,5 +103,6 @@ const updateBoard = async (req: Request, res: Response) => {
 export default {
   postBoard,
   getBoards,
-  updateBoard
+  updateBoard,
+  deleteBoard
 };
