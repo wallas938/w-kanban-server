@@ -52,6 +52,38 @@ const deleteBoard = async (req: Request, res: Response) => {
   }
 };
 
+const deleteTask = async (req: Request, res: Response) => {
+  try {
+    const { boardId, columnIdx, taskIdx } = req.params
+    if(!boardId || !columnIdx || !taskIdx ) return res.status(403).json({
+      message: "Task not found!",
+      ok: false
+    });
+
+    const board: any = await BoardModel.findOne({ _id: req.params.boardId })
+
+    if (!board) return res.status(403).json({
+      message: "Board not found!",
+      ok: false
+    });
+
+    board.columns[columnIdx].tasks.splice(taskIdx, 1);
+
+    board.save();    
+
+    return res.status(200).json({
+      message: "Task deleted!",
+      ok: true
+    });
+  } catch (error) {
+    return res.status(500).json({
+      error,
+      message: "An error occured",
+      ok: false
+    })
+  }
+};
+
 const getBoards = async (req: Request, res: Response) => {
   const userId = req.query.userId;
   try {
@@ -104,5 +136,6 @@ export default {
   postBoard,
   getBoards,
   updateBoard,
-  deleteBoard
+  deleteBoard,
+  deleteTask
 };
