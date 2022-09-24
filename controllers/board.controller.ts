@@ -97,7 +97,7 @@ const getBoards = async (req: Request, res: Response) => {
       })
    }
   } catch (error) {
-    return res.status(200).json({
+    return res.status(500).json({
       message: "An error occured",
       ok: false,
       error: error
@@ -150,11 +150,50 @@ const updateBoard = async (req: Request, res: Response) => {
   }
   
 }
+const updateTask = async (req: Request, res: Response) => {
+  try {
+    const { boardId, columnIdx, taskIdx } = req.params
+    if(!boardId || !columnIdx || !taskIdx ) return res.status(400).json({
+      message: "Task not found!",
+      ok: false
+    });
+
+    const board: any = await BoardModel.findOne({ _id: req.params.boardId })
+
+    if (!board) return res.status(404).json({
+      message: "Board not found!",
+      ok: false
+    });
+
+    if(!req.body.task) return res.status(400).json({
+      message: "The request body Task is missing!",
+      ok: false
+    });
+
+    board.columns[req.body.oldColumnIndex].tasks.splice(taskIdx, 1);
+
+    board.columns[columnIdx].tasks.splice(taskIdx, 0, req.body.task);
+    
+    board.save();    
+
+    return res.status(200).json({
+      message: "Task Updated!",
+      ok: true
+    });
+  } catch (error) {
+    return res.status(500).json({
+      error,
+      message: "An error occured",
+      ok: false
+    })
+  }
+};
 
 export default {
   postBoard,
   getBoards,
   updateBoard,
   deleteBoard,
-  deleteTask
+  deleteTask,
+  updateTask
 };
