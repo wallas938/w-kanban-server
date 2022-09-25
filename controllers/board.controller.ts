@@ -169,10 +169,10 @@ const updateTask = async (req: Request, res: Response) => {
       message: "The request body Task is missing!",
       ok: false
     });
-
-    board.columns[req.body.oldColumnIndex].tasks.splice(taskIdx, 1);
-
-    board.columns[columnIdx].tasks.splice(taskIdx, 0, req.body.task);
+    const index = board.columns[columnIdx].length > 0 ? board.columns[columnIdx].length - 1 : 0;
+    const deletingIndex = board.columns[req.body.oldColumnIndex].tasks.findIndex((t: any) => t.id === req.body.task.id)
+    board.columns[req.body.oldColumnIndex].tasks.splice(deletingIndex, 1);
+    board.columns[columnIdx].tasks.splice(index, 0, req.body.task);
     
     board.save();    
 
