@@ -12,7 +12,7 @@
     "skipDefaultLibCheck": true,
     "emitDecoratorMetadata": true,
     "experimentalDecorators": true,
-    "outDir": "./dist",
+    "outDir": "dist",
     "strictPropertyInitialization": false,
     "paths": {
       "~/*": ["./*"],
