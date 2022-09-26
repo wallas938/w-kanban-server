@@ -5,7 +5,7 @@
   "main": "server.ts",
   "scripts": {
     "dev": "nodemon --watch",
-    "start": "ts-node server.ts",
+    "start": "nodemon server.ts",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "repository": {
