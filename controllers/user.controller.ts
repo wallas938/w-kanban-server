@@ -47,10 +47,10 @@ const signup = async (req: Request, res: Response) => {
     return res.status(201).json({
       user: {
         email: registeredUser.email,
-      _id: registeredUser._id,
+        _id: registeredUser._id,
+      },
       accessToken,
       refreshToken,
-      },
       ok: true,
     });
   } catch (error) {
@@ -101,11 +101,11 @@ const signin = async (req: Request, res: Response) => {
       return res.status(200).json({
         user: {
           email: user.email,
-        _id: user._id,
+          _id: user._id,
+        },
         accessToken,
         refreshToken,
-      },
-      ok: true,
+        ok: true,
       });
     }
   } catch (error) {
@@ -118,31 +118,31 @@ const signin = async (req: Request, res: Response) => {
 };
 
 const getUser = async (req: Request, res: Response) => {
-  const accessToken: any =  req.query.access_token;
-  const refreshToken =  req.query.refresh_token;
+  const accessToken: any = req.query.access_token;
+  const refreshToken = req.query.refresh_token;
 
-  if(isTokenValid(accessToken, `${process.env.ACCESS_TOKEN_SECRET_KEY}`)) {
+  if (isTokenValid(accessToken, `${process.env.ACCESS_TOKEN_SECRET_KEY}`)) {
     const userData: any = jwt.decode(accessToken.split(" ")[1])
-    
+
     const user = await UserModel.findById(userData._id).select('-password')
 
-    if(user) {
+    if (user) {
 
       return res.status(200).json({
         user: {
           email: user.email,
           _id: user._id,
-          accessToken,
-          refreshToken,
         },
+        accessToken,
+        refreshToken,
         ok: true,
       })
     }
-    
+
   }
 }
 
-const autoLogin = async (req: Request, res: Response) => {};
+const autoLogin = async (req: Request, res: Response) => { };
 
 const checkIfEmailExists = async (email: string) => {
   try {
